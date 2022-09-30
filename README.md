@@ -11,3 +11,6 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.js
 ```
+##merkle tree white listing functionality content
+
+https://www.youtube.com/watch?v=67vkL8XkoJ0
