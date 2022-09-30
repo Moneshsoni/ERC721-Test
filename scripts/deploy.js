@@ -7,10 +7,10 @@
 const hre = require("hardhat");
 
 async function main() {
- const ERC721Collection = await hre.ethers.getContractFactory("ERC721Collection");
- const eRC721Collection = await  ERC721Collection.deploy()
- await eRC721Collection.deployed();
- console.log("Address of collection!",eRC721Collection.address);
+ const WhitelistSale = await hre.ethers.getContractFactory("WhitelistSale");
+ const whitelistSale = await  WhitelistSale.deploy("0x15e1a54af0c562685bc619b9b770a503b272a845a0a8451f6c4265802a44eca4");
+ await whitelistSale.deployed();
+ console.log("Address of WhitelistSale ERC721! ",whitelistSale.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
@@ -20,6 +20,6 @@ main().catch((error) => {
   process.exitCode = 1;
 });
 
-// collection address! 0x931c9416C3d915580e68D8FB4124F17E8B70D917
+// Address of WhitelistSale ERC721!  0x846A0b383B474Fe3511471008328194e33d8579B
 
-//Collection verify address! https://mumbai.polygonscan.com/address/0x931c9416C3d915580e68D8FB4124F17E8B70D917#code
+//Collection verify address! https://mumbai.polygonscan.com/address/0x1C2896Ed9A37B5eE763Fa68f4328bc86EE0a0fba#code
