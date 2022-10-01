@@ -9,6 +9,7 @@ const whitelisted = [
   "0x07C622BC6E19636807296E44D598F6e4a166f857",
 ];
 
+
 // 3. Creating a buffer since we bytes array
 const padBuffer = (addr) => {
   return Buffer.from(addr.substr(2).padStart(32 * 2, 0), "hex");
@@ -17,7 +18,6 @@ const padBuffer = (addr) => {
 // 4. Creating buffer from leaves (lowest points in tree)
 const leaves = whitelisted.map((address) => padBuffer(address));
 const tree = new MerkleTree(leaves, keccak256, { sort: true });
-
 // 5. Creating a merkleRoot that we'll inject into smart contract
 const merkleRoot = tree.getHexRoot();
 
@@ -27,4 +27,13 @@ console.log("MerkleRoot",merkleRoot);
 
 // 6. Calculating merkleProof to check if an address is whitelisted
 const merkleProof = tree.getHexProof(padBuffer(whitelisted[0]));
+console.log(merkleProof);
+const merkleProof1 = tree.getHexProof(padBuffer(whitelisted[0]));
+console.log(merkleProof1);
+const merkleProof2 = tree.getHexProof(padBuffer(whitelisted[0]));
 
+console.log(merkleProof2);
+
+// ["0x8eac4673aea45f493f1775d2ee9cc40555812cdb5d8a2c5802857c32686d6a52","0x8eac4673aea45f493f1775d2ee9cc40555812cdb5d8a2c5802857c32686d6a52",
+// "0x8eac4673aea45f493f1775d2ee9cc40555812cdb5d8a2c5802857c32686d6a52"
+// ]
