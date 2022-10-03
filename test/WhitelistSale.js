@@ -1,41 +1,64 @@
 const { expect } = require("chai");
-const { ethers, upgrades } = require("hardhat");
-const { MerkleTree } = require("merkletreejs");
-const keccak256 = require("keccak256");
+const { ethers } = require("hardhat");
+const { MerkleTree } = require('merkletreejs');
+const keccak256 = require('keccak256');
 
-describe('Test Contract', async () => {
-  before(async () => {
+describe("Collection", function () {
+
+  let whitelist = [];
+  let leafNodes;
+  let root;
+  let collection;
+  let proof;
+
+  before(async function () {
 
     accounts = await ethers.getSigners();
-    [user, add1, add2, add3, _] = accounts;
-    WhitelistSale = await hre.ethers.getContractFactory("WhitelistSale");
-    whitelistSale = await WhitelistSale.deploy("0x15e1a54af0c562685bc619b9b770a503b272a845a0a8451f6c4265802a44eca4");
-    await whitelistSale.deployed();
-    
-    // console.log("Address of WhitelistSale ERC721! ",whitelistSale.address);
+    whitelist.push(accounts[0].address)
+    whitelist.push(accounts[1].address)
+    whitelist.push(accounts[2].address)
+    whitelist.push(accounts[3].address)
+    leafNodes = whitelist.map((node) => keccak256(node));
+
+    const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
+
+    root = merkleTree.getHexRoot().toString();
+    console.log(root);
+    proof = merkleTree.getHexProof(leafNodes[2])
+
+    const Collection = await ethers.getContractFactory("Collection");
+    collection = await Collection.deploy();
+    await collection.deployed();
+  });
+
+  describe("Collection minting test ", async function () {
+
+    it("Should set root hash", async function () {
+
+      const tx = await collection.connect(accounts[0]).setMerkleRoot(root);
+      await tx.wait();
+
+      expect(await collection.merkleRoot()).to.equal(root);
+
+    });
+
+    it("Should mint NFTs via whitelsit ", async function () {
+      const tx = await collection.connect(accounts[2]).mint("hello world", proof);
+      expect(await collection.ownerOf(1)).to.equal(accounts[2].address);
+
+    });
+
+    it("Should not mint NFTs via  whitelsit with non vaild proofs ", async function () {
+      await expect(collection.connect(accounts[1]).mint("hello world", proof)).to.be.revertedWith('user is not verify');
+    });
+
+    it("Should not mint NFTs via  non whitelsit  ", async function () {
+
+      await expect(collection.connect(accounts[5]).mint("hello world", proof)).to.be.revertedWith('user is not verify');
+
+    });
+
 
   });
 
-  describe("Test cases for merkle tree", () => {
-    
-    it("Should check Name", async () => {
-
-      expect(await whitelistSale.name()).to.be.equal("Test");
-    });
-
-    it("Should check symbol", async () => {
-
-      expect(await whitelistSale.symbol()).to.equal("NFT");
-
-    });
-
-    it("should check the merkleRoot", async () => {
-      let merkleRoot = await whitelistSale.merkleRoot();
-      expect(await whitelistSale.merkleRoot()).to.equal(merkleRoot);
-    });
-
-  })
-
 });
-
-   // test cases

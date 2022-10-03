@@ -17,7 +17,7 @@ async function main() {
 // and properly handle errors.
 main().catch((error) => {
   console.error(error);
-  process.exitCode = 1;
+  proce``ss.exitCode = 1;
 });
 
 // Address of WhitelistSale ERC721!  0x846A0b383B474Fe3511471008328194e33d8579B

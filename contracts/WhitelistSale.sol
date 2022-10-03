@@ -1,33 +1,43 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.4;
+//SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.0;
+
+import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract WhitelistSale is ERC721 {
-    bytes32 public immutable merkleRoot;
-    uint256 public nextTokenId;
-    mapping(address => bool) public claimed;
+contract Collection is ERC721URIStorage, Ownable {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIds;
+    bytes32 public merkleRoot;
 
-    constructor(bytes32 _merkleRoot) ERC721("Test", "NFT") {
-        merkleRoot = _merkleRoot;
+    constructor() ERC721("MY-NFT Collection", "MYNFT") {}
+
+    function setMerkleRoot(bytes32 _root) public onlyOwner {
+        merkleRoot = _root;
     }
 
-    function toBytes32(address addr) internal pure returns (bytes32) {
-        return bytes32(uint256(uint160(addr)));
-    }
-
-    function mint(bytes32[] calldata merkleProof) public payable {
-        require(claimed[msg.sender] == false, "already claimed");
-        claimed[msg.sender] = true;
+    function mint(string memory tokenURI, bytes32[] calldata proof)
+        public
+        returns (uint256)
+    {
+        bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
         require(
-            MerkleProof.verify(
-                merkleProof,
-                merkleRoot,
-                keccak256(abi.encodePacked(msg.sender))
-            ) == true,
-            "invalid merkle proof"
+            MerkleProof.verify(proof, merkleRoot, leaf),
+            "user is not verify"
         );
-        nextTokenId++;
-        _mint(msg.sender, nextTokenId);
+        _tokenIds.increment();
+        uint256 newItemId = _tokenIds.current();
+        _mint(msg.sender, newItemId);
+        _setTokenURI(newItemId, tokenURI);
+        return newItemId;
     }
 }
+
+
+
+
+
+
+// ["0x8eac4673aea45f493f1775d2ee9cc40555812cdb5d8a2c5802857c32686d6a52","0x8eac4673aea45f493f1775d2ee9cc40555812cdb5d8a2c5802857c32686d6a52","0x8eac4673aea45f493f1775d2ee9cc40555812cdb5d8a2c5802857c32686d6a52"]
