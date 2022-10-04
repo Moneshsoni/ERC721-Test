@@ -19,13 +19,11 @@ describe("Collection", function () {
     whitelist.push(accounts[2].address)
     whitelist.push(accounts[3].address)
     leafNodes = whitelist.map((node) => keccak256(node));
-
     const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
-
+  
     root = merkleTree.getHexRoot().toString();
-    console.log(root);
+   
     proof = merkleTree.getHexProof(leafNodes[2])
-
     const Collection = await ethers.getContractFactory("Collection");
     collection = await Collection.deploy();
     await collection.deployed();
@@ -37,7 +35,6 @@ describe("Collection", function () {
 
       const tx = await collection.connect(accounts[0]).setMerkleRoot(root);
       await tx.wait();
-
       expect(await collection.merkleRoot()).to.equal(root);
 
     });
@@ -47,6 +44,11 @@ describe("Collection", function () {
       expect(await collection.ownerOf(1)).to.equal(accounts[2].address);
 
     });
+
+    it("Should check the balance", async function(){
+      const balance = await collection.balanceOf(accounts[2].address);
+      expect(await collection.balanceOf(accounts[2].address)).to.be.equal(balance);
+    })
 
     it("Should not mint NFTs via  whitelsit with non vaild proofs ", async function () {
       await expect(collection.connect(accounts[1]).mint("hello world", proof)).to.be.revertedWith('user is not verify');
